@@ -17,6 +17,20 @@ and hyphen.
 '''
 EXCLUDE = set('!"#$%&()*+,./:;<=>?@[\\]^_`{|}~')
 
+CMU = cmudict.dict()
+
+# Chances are these words should never be stressed.
+UNSTRESSED = 'a an of the am and n for in is on or that to with'.split()
+UNSTRESSED+= 'are as be by he him is her my she them em us we'.split()
+UNSTRESSED+= 'its they their were you your'.split()
+UNSTRESSED+= 'at do did from i it me but had has have our shall was will'.split()
+UNSTRESSED+= 'dost hast hath shalt thee thou thy wilt ye'.split()
+UNSTRESSED+= 'if how what when where who why can so this though which'.split()
+UNSTRESSED+= 'could should would all like nor out too yet near through while whose'.split()
+UNSTRESSED+= 'these those came come none one two three four five six eight nine ten'.split()
+UNSTRESSED+= 'ah en et la may non off per re than un his'.split()
+
+
 def openFile(poem, filename):
 	'''
 		poem(list poem, string filename)
@@ -31,7 +45,6 @@ def openFile(poem, filename):
 		temp = nltk.WhitespaceTokenizer().tokenize(datum)
 		poem.append(temp)
 	return poem
-
 
 def makeWords(poem):
 	'''
@@ -81,3 +94,160 @@ def makeWords(poem):
 				tempLine['line'].append(temp)
 		tempPoem.append(tempLine)
 	return tempPoem
+
+def replaceStuff(word):
+	'''
+		Takes word (as dict).
+		Modifies the dictionary as needed.
+		Replaces: 'd endings with ed; 'n with en;
+	'''
+	temp = word['word'] #store original word to check if we replaced
+	if (len(word['word']) > 1):
+		if ((word['word'][-2] == "'")):
+			if ((word['word'][-1] == "d") or (word['word'][-1] == "n")): # ends in 'd, 'n
+				word['word'] = word['word'].replace(word['word'][-2], 'e')
+		for punct in string.punctuation:
+			word['word'] = word['word'].replace(punct, "") ## strip any other punctuation
+	if (word['word'] == temp): ## did we replace anything?
+		word['repl'] = False
+	else:
+		word['repl'] = True
+
+def procLine(line):
+	'''
+		Receives line of poem
+			(dict w/ upper/lower/blank/line (list of words as dicts)
+		Checks each word in the line, gets syl count for word/line
+	'''
+		# for line in tempPoem:
+		# 	for word in line['line']:
+		# 		word['word']
+	for w in line['line']: #for each word in line['line']
+		w['inDict'] = checkDict(w['word'])
+		getSyl(w) # get syl counts for each word
+		getStress(w) # get stresses for each word
+		line['lower'] += w['low']
+		line['upper'] += w['high']
+
+def getStress(w):
+	if (w['inDict'] == True):
+		lookup = w['word']
+		lookup = CMU[lookup]	
+		w['stress'] = doStress(lookup)
+
+def doStress(lookup):
+	if lookup not in UNSTRESSED:
+		return [i[-1] for i in lookup[0] if i[-1].isdigit()]
+	else:
+		return 0
+
+def getSyl(word):
+	'''
+		Takes dictionary "word." Finds min/max syl count.
+		Stores results in word['low'] and word['high'], respectively.
+		If in CMU, use that. Otherwise, use dumbGuess.
+	'''
+	if (word['inDict'] == True):
+		try:
+			lowercase = word['word']
+		except KeyError:
+			lowercase = word['word'][:-1]
+		word['low'], word['high'] = getSylCMU(lowercase)
+	else:
+		lowercase = word['word']
+		word['low'], word['high'] = dumbGuess(lowercase)
+
+def getSylCMU(lowercase):
+	'''
+		Receives lowercase (a string).
+		Returns two values, low and high.
+		Checks CMU[dict] for the minimum and maximum syllable counts
+	'''
+	low = min([len([y for y in x if isdigit(y[-1])]) for x in CMU[lowercase]])
+	high = max([len([y for y in x if isdigit(y[-1])]) for x in CMU[lowercase]])
+	return low, high
+
+def dumbGuess(lowercase):
+	'''
+		Receives lowercase (a string).
+		Returns two values, low and high.
+		Runs a dumb heuristic to determine a dumb syllable count.
+	'''
+	numSyl = 0
+	numVowels = 0
+	lastVowel = False
+	for ch in lowercase:
+		isVowel = False
+		for v in VOWELS:
+			if ((v == ch) and (lastVowel)):
+				isVowel = True
+				lastVowel = True
+			elif ((v == ch) and not (lastVowel)):
+				numVowels = numVowels + 1
+				isVowel = True
+				lastVowel = True
+		if not isVowel:
+			lastVowel = False
+	if (lowercase[-2:] == 'es') or (lowercase[-1:] == 'e'):
+		numVowels = numVowels -1
+	return numVowels, numVowels ## low, and high
+
+def replaceHyphen(wordA, wordB):
+	'''
+		Recieves two 'word' as dict, wordB is blank.
+		Called from makeWords.
+		Replaces hyphen with a space. Returns two values, the words pre/post-hyphen
+		Note, this is really clumsy... replace hyphen in A with a space. Set temp
+			to the split word. Split it at the space (thus making a list?). Set 
+			wordA to 1st item of temp; wordB to 2nd item. Return both words (as dict)
+			UNLESS the hyphen is at the last character.
+	'''
+	counter = 0
+	for ch in wordA['word']:
+		if (ch == '-'):
+			counter += 1
+	if ((counter == 1) and (wordA['word'][-1]=='-')):
+		wordB['lastChar'] = True
+	for punct in set('-'):
+		wordA['word'] = wordA['word'].replace(punct, ' ')
+	temp = wordA['word']
+
+	if (wordB['lastChar'] == True):
+		temp = temp.split(' ')
+		wordA['word'] = temp[0]
+		wordB['word'] = ' '
+	else:
+		temp = temp.split(' ')
+		wordA['word'] = temp[0]
+		wordB['word'] = temp[1]
+	return wordA, wordB
+
+def replaceStuff(word):
+	'''
+		Takes word (as dict).
+		Modifies the dictionary as needed.
+		Replaces: 'd endings with ed; 'n with en;
+	'''
+	temp = word['word'] #store original word to check if we replaced
+	if (len(word['word']) > 1):
+		if ((word['word'][-2] == "'")):
+			if ((word['word'][-1] == "d") or (word['word'][-1] == "n")): # ends in 'd, 'n
+				word['word'] = word['word'].replace(word['word'][-2], 'e')
+		for punct in string.punctuation:
+			word['word'] = word['word'].replace(punct, "") ## strip any other punctuation
+	if (word['word'] == temp): ## did we replace anything?
+		word['repl'] = False
+	else:
+		word['repl'] = True
+
+def checkDict(word):
+	'''
+		Takes string (such as something['word']). Returns a boolean.
+		Checks for existence of string in the CMU dict.
+	'''
+	found = True	
+	if word not in CMU:
+		if word[:-1] not in CMU:
+			found = False
+		found = False
+	return found

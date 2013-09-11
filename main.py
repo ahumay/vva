@@ -8,6 +8,13 @@ def main(filename):
 	poem = [] #place to store poem
 	poem = openFile(poem, filename)
 	poem = makeWords(poem)
+	for line in poem:
+		procLine(line)
+
+	for line in poem:
+		for word in line['line']:
+			print word['word']
+			print word['stress']
 
 ## main
 if __name__ == '__main__':
