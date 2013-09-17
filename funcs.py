@@ -271,24 +271,24 @@ def createStressArray(poem):
 	'''
 	for line in poem:
 		# Do syllable counts for line look good?
-		if (line['lower'] == line['upper']):
+#		if (line['lower'] == line['upper']):
 			# if so, we're gonna do something! yay! Things!
 			# make list to hold stuff, descriptively called thing!
-			thing = []
-			counter = 0 #count syllables
-			for word in line['line']:
-				if word['word'] in UNSTRESSED:
-					thing.append(0)
-				elif word['word'] not in UNSTRESSED and word['inDict']:
-					for item in word['stress']:
-						if item is '1':
-							thing.append(1)
-						if item is '2':
-							thing.append(1)
-						if item is '0':
-							thing.append(0)
-				elif word['word'] not in UNSTRESSED and word['inDict'] == False:
-					while counter < word['high']:
-						thing.append(9)
-						counter += 1
-			line['stressArray'] = thing
+		thing = []
+		counter = 0 #count syllables
+		for word in line['line']:
+			if word['word'] in UNSTRESSED:
+				thing.append(0)
+			elif word['word'] not in UNSTRESSED and word['inDict']:
+				for item in word['stress']:
+					if item is '1':
+						thing.append(1)
+					if item is '2':
+						thing.append(1)
+					if item is '0':
+						thing.append(0)
+			elif word['word'] not in UNSTRESSED and word['inDict'] == False:
+				while counter < word['high']:
+					thing.append(9)
+					counter += 1
+		line['stressArray'] = thing
