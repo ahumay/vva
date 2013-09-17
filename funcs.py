@@ -30,6 +30,13 @@ UNSTRESSED+= 'could should would all like nor out too yet near through while who
 UNSTRESSED+= 'these those came come none one two three four five six eight nine ten'.split()
 UNSTRESSED+= 'ah en et la may non off per re than un his'.split()
 
+VOWELS = ['a', 'e', 'i', 'o', 'u', 'y']
+
+DIPHTHONGS = ['aa', 'ae', 'ai', 'ao', 'au',
+              'ea', 'ee', 'ei', 'eo', 'eu',
+              'ia', 'ie', 'ii', 'io', 'iu',
+              'oa', 'oe', 'oi', 'oo', 'ou'
+              'ua', 'ue', 'ui', 'uo', 'uu']
 
 def openFile(poem, filename):
 	'''
@@ -119,9 +126,6 @@ def procLine(line):
 			(dict w/ upper/lower/blank/line (list of words as dicts)
 		Checks each word in the line, gets syl count for word/line
 	'''
-		# for line in tempPoem:
-		# 	for word in line['line']:
-		# 		word['word']
 	for w in line['line']: #for each word in line['line']
 		w['inDict'] = checkDict(w['word'])
 		getSyl(w) # get syl counts for each word
@@ -130,16 +134,19 @@ def procLine(line):
 		line['upper'] += w['high']
 
 def getStress(w):
-	if (w['inDict'] == True):
+	if (w['inDict'] == True) and (w['word'] not in UNSTRESSED):
 		lookup = w['word']
 		lookup = CMU[lookup]	
+		w['stress'] = doStress(lookup)
+	elif (w['word'] in UNSTRESSED):
+		lookup = w['word']
 		w['stress'] = doStress(lookup)
 
 def doStress(lookup):
 	if lookup not in UNSTRESSED:
 		return [i[-1] for i in lookup[0] if i[-1].isdigit()]
 	else:
-		return 0
+		return ['0']
 
 def getSyl(word):
 	'''
@@ -147,15 +154,18 @@ def getSyl(word):
 		Stores results in word['low'] and word['high'], respectively.
 		If in CMU, use that. Otherwise, use dumbGuess.
 	'''
-	if (word['inDict'] == True):
+	if (word['inDict'] == True) and (word['word'] not in UNSTRESSED):
 		try:
 			lowercase = word['word']
 		except KeyError:
 			lowercase = word['word'][:-1]
 		word['low'], word['high'] = getSylCMU(lowercase)
-	else:
+	elif (word['word'] not in UNSTRESSED) and (word['inDict'] == False):
 		lowercase = word['word']
 		word['low'], word['high'] = dumbGuess(lowercase)
+	else:
+		word['low'] = 0
+		word['high'] = 0
 
 def getSylCMU(lowercase):
 	'''
@@ -251,3 +261,34 @@ def checkDict(word):
 			found = False
 		found = False
 	return found
+
+def createStressArray(poem):
+	'''
+		Takes poem from main. Creates a list from the stresses.
+		Stores this list in line['stressArray].
+		This list is checked against existing lists of candidate meters (eventually)
+			(See settings.py)
+	'''
+	for line in poem:
+		# Do syllable counts for line look good?
+		if (line['lower'] == line['upper']):
+			# if so, we're gonna do something! yay! Things!
+			# make list to hold stuff, descriptively called thing!
+			thing = []
+			counter = 0 #count syllables
+			for word in line['line']:
+				if word['word'] in UNSTRESSED:
+					thing.append(0)
+				elif word['word'] not in UNSTRESSED and word['inDict']:
+					for item in word['stress']:
+						if item is '1':
+							thing.append(1)
+						if item is '2':
+							thing.append(1)
+						if item is '0':
+							thing.append(0)
+				elif word['word'] not in UNSTRESSED and word['inDict'] == False:
+					while counter < word['high']:
+						thing.append(9)
+						counter += 1
+			line['stressArray'] = thing

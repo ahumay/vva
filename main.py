@@ -10,11 +10,20 @@ def main(filename):
 	poem = makeWords(poem)
 	for line in poem:
 		procLine(line)
+	createStressArray(poem)
 
 	for line in poem:
+		outstring = ""
 		for word in line['line']:
-			print word['word']
-			print word['stress']
+			outstring += str(word['stress'])
+			outstring += word['word']
+			outstring += " "
+		print outstring
+	for line in poem:
+		outstring = ""
+		for item in line['stressArray']:
+			outstring += '  ' + str(item) + ' '
+		print outstring
 
 ## main
 if __name__ == '__main__':
