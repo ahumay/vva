@@ -10,6 +10,7 @@ import sys
 import pprint
 import string
 from copy import deepcopy
+import operator
 
 '''
 Exclude all string.punctuation except apostrophe,
@@ -292,3 +293,47 @@ def createStressArray(poem):
 					thing.append(9)
 					counter += 1
 		line['stressArray'] = thing
+
+def findTWEEN(line):
+	'''
+		"It also counts the number of unstressed syllables that occur 
+		between two consecutive stressed syllables throughout the poem.
+		-- M.R. Plamondon "Virtual Verse Analysis..." p132
+
+		So what if I got 0 1 0 0 0 1 0 1 0 1 0 1... which consecutive?
+		I could get either:
+			3 (for 1 0 0 0 1)
+			1 for (1 0 1)
+		Should I be finding _ALL_ the possible tween values for consecutive stresses?
+	'''
+	i = 0
+	j = 0
+	## gok ## 
+	for item in line:
+		i += 1
+		if (item == 1):
+			break
+	for item in line[i:]: #start @ i
+		if (item == 0):
+			j += 1
+		elif (item == 1):
+			break
+	return j
+
+def findPOST(line):
+	counter = 0 #init
+	for item in reversed(line): #reverses a list! awesome!
+		if (item == 1):
+			break
+		elif (item == 0):
+			counter += 1
+	return counter
+
+def findPRE(line):
+	counter = 0 # init
+	for item in line:
+		if (item == 1):
+			break
+		elif (item == 0):
+			counter += 1
+	return counter

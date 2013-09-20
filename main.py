@@ -27,61 +27,52 @@ def main(filename):
 		print outstring
 
 # -- gok --
-	unstressPRE = 0
-	unstressPOST = 0
-	unstressTWEEN = 0
 	for line in poem:
 		print line['stressArray']
-		unstressPRE = findPRE(line['stressArray'])
-		unstressPOST = findPOST(line['stressArray'])
-		unstressTWEEN = findTWEEN(line['stressArray'])
-		print "      ", "pre = ", unstressPRE, " post = ", unstressPOST
-		print "      ", "tween = ", unstressTWEEN
+		line['unstressPRE'] = findPRE(line['stressArray'])
+		line['unstressPOST'] = findPOST(line['stressArray'])
+		line['unstressTWEEN'] = findTWEEN(line['stressArray'])
+# -- get stats -- 
+	stats = {}
+	stats['pre'] = -9
+	stats['post'] = -9
+	stats['tween'] = -9
+	
+	pre = freqStats(poem, 'unstressPRE')
+	post = freqStats(poem, 'unstressPOST')
+	tween = freqStats(poem, 'unstressTWEEN')
+	
+	print "pre: ", pre
+	print "post: ", post
+	print "tween: ", tween
+
+	prePrim = firstSecond(pre)
+	print prePrim
+	print pre[prePrim]
+	# form = determineFoot(pre, post, tween)
+
+def firstSecond(motorola):
+	return max(motorola.iteritems(), key=operator.itemgetter(1))[0]
+# http://stackoverflow.com/questions/268272/getting-key-with-maximum-value-in-dictionary
+# ^ sweeeeeeet 
+
+def determineFoot(pre, post, tween):
+	form = dict(
+		iambic={'before':1, 'after':0, 'tween':0},
+		trochaic={'before':0, 'after':1, 'tween':1})
 
 
-
-def findTWEEN(line):
-	'''
-		"It also counts the number of unstressed syllables that occur 
-		between two consecutive stressed syllables throughout the poem.
-		-- M.R. Plamondon "Virtual Verse Analysis..." p132
-
-		So what if I got 0 1 0 0 0 1 0 1 0 1 0 1... which consecutive?
-		I could get either:
-			3 (for 1 0 0 0 1)
-			1 for (1 0 1)
-	'''
-	i = 0
-	j = 0
-	## gok ## 
-	for item in line:
-		i += 1
-		if (item == 1):
-			break
-	for item in line[i:]: #start @ i
-		if (item == 0):
-			j += 1
-		elif (item == 1):
-			break
-	return j
-
-def findPOST(line):
-	counter = 0 #init
-	for item in reversed(line): #reverses a list! awesome!
-		if (item == 1):
-			break
-		elif (item == 0):
-			counter += 1
-	return counter
-
-def findPRE(line):
-	counter = 0 # init
-	for item in line:
-		if (item == 1):
-			break
-		elif (item == 0):
-			counter += 1
-	return counter
+def freqStats(poem, thing):
+	stats = {}
+	x = []
+	for line in poem:
+		x.append(line[thing])
+	for item in x:
+		if item in stats:
+			stats[item] += 1
+		else: 
+			stats[item] = 1
+	return stats 
 
 
 
