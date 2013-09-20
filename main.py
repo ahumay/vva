@@ -37,24 +37,51 @@ def main(filename):
 	stats['pre'] = -9
 	stats['post'] = -9
 	stats['tween'] = -9
-	
+# store stuff in a dictionary	
 	pre = freqStats(poem, 'unstressPRE')
 	post = freqStats(poem, 'unstressPOST')
 	tween = freqStats(poem, 'unstressTWEEN')
 	
-	print "pre: ", pre
-	print "post: ", post
-	print "tween: ", tween
+	stats['pre'] = pre
+	stats['post'] = post
+	stats['tween'] = tween
 
-	prePrim = firstSecond(pre)
-	print prePrim
-	print pre[prePrim]
-	# form = determineFoot(pre, post, tween)
+	print stats
+	
+	spenser = pre.keys()
+	prePrim, preSec = spenser[0], spenser[1]
+	print prePrim, pre[spenser[0]]
+	print preSec, pre[spenser[1]]
+
+			#	spenser = post.keys()
+			#	print spenser
+			#	postPrim, postSec = spenser[0], spenser[1]
+
+			#	print postPrim, pre[spenser[0]]
+			#	print postSec, pre[spenser[1]]
+
+				# spenser = tween.keys()
+				# tweenPrim, tweenSec = spenser[0], spenser[1]
+				# print tweenPrim, pre[spenser[0]]
+				# print tweenSec, pre[spenser[1]]
+
+				# #-- { #unstressBeforeStress: value} etc
+				# print "pre: ", pre
+				# print "post: ", post
+				# print "tween: ", tween
+
+				# prePrim = firstSecond(pre)
+				# print prePrim, "shows up: ", pre[prePrim]
+
+
+
+				# # form = determineFoot(pre, post, tween)
+
 
 def firstSecond(motorola):
 	return max(motorola.iteritems(), key=operator.itemgetter(1))[0]
 # http://stackoverflow.com/questions/268272/getting-key-with-maximum-value-in-dictionary
-# ^ sweeeeeeet 
+# ^ sweeeeeeet
 
 def determineFoot(pre, post, tween):
 	form = dict(
