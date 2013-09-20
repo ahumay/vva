@@ -34,7 +34,10 @@ def main(filename):
 		print line['stressArray']
 		unstressPRE = findPRE(line['stressArray'])
 		unstressPOST = findPOST(line['stressArray'])
+		unstressTWEEN = findTWEEN(line['stressArray'])
 		print "      ", "pre = ", unstressPRE, " post = ", unstressPOST
+		print "      ", "tween = ", unstressTWEEN
+
 
 
 def findTWEEN(line):
@@ -43,15 +46,28 @@ def findTWEEN(line):
 		between two consecutive stressed syllables throughout the poem.
 		-- M.R. Plamondon "Virtual Verse Analysis..." p132
 
-		So what if I got 0 1 0 1 0 1 0 1 0 1 0 1... which consecutive?
-		"
-
-		
+		So what if I got 0 1 0 0 0 1 0 1 0 1 0 1... which consecutive?
+		I could get either:
+			3 (for 1 0 0 0 1)
+			1 for (1 0 1)
 	'''
+	i = 0
+	j = 0
+	## gok ## 
+	for item in line:
+		i += 1
+		if (item == 1):
+			break
+	for item in line[i:]: #start @ i
+		if (item == 0):
+			j += 1
+		elif (item == 1):
+			break
+	return j
 
 def findPOST(line):
 	counter = 0 #init
-	for item in reversed(line):
+	for item in reversed(line): #reverses a list! awesome!
 		if (item == 1):
 			break
 		elif (item == 0):
