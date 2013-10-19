@@ -33,7 +33,9 @@ def main(argv):
             dictword = dictword.strip()
             dictword = dictword.lower()
             if (dictword not in CMU) and (dictword not in samJ):
-#                print line
+
+                # The following block reloops through the line
+                # in order to colorize the output.
                 outstring = ""
                 for w in line.split():
                     if (w == word):
