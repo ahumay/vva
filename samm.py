@@ -27,18 +27,28 @@ def main(argv):
             samJ.append(word)
     
     for line in lines:
+
         for word in line.split():
-            word = word.strip(PUNCTUATION)
-            word = word.strip()
-            word = word.lower()
-            if (word not in CMU) and (word not in samJ):
+            dictword = word.strip(PUNCTUATION)
+            dictword = dictword.strip()
+            dictword = dictword.lower()
+            if (dictword not in CMU) and (dictword not in samJ):
+#                print line
+                outstring = ""
+                for w in line.split():
+                    if (w == word):
+                        outstring += bcolors.OKGREEN + w + bcolors.ENDC + ' '
+                    else:
+                        outstring += w + ' '
+
+                print outstring
+
                 scanscion_string = ""
-                print line
                 # This while loop waits for "valid" input; for now
                 # that just means that if you hit enter, it won't
                 # write an empty string to our private dictionary.
                 while not (valid_scanscion(scanscion_string)):
-                    outstring = "Please scan " + word + ":"
+                    outstring = "Please scan " + bcolors.OKGREEN + word + bcolors.ENDC + ":"
                     scanscion_string = raw_input(outstring)
                 
                 # Write it out by appending to our Private Dictionary File.
@@ -60,6 +70,23 @@ def valid_scanscion(string):
         return True
     else:
         return False
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+
+    def disable(self):
+        self.HEADER = ''
+        self.OKBLUE = ''
+        self.OKGREEN = ''
+        self.WARNING = ''
+        self.FAIL = ''
+        self.ENDC = ''
 
 
 if __name__ == "__main__":
