@@ -40,6 +40,7 @@ def main(argv):
     for line in lines:
         current_line += 1
         for word in line.split():
+        #for word in line.replace('-', ' ').split()
             dictword = word.strip(PUNCTUATION)
             dictword = dictword.strip()
             dictword = dictword.lower()
