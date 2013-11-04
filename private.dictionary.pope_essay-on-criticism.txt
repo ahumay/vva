@@ -1,0 +1,141 @@
+#term,scanscion,frequency
+,**,10
+'twere,Twere,1
+'twixt,'twixt,1
+all-involving,all* -in vol* ving,1
+ancient's,an* cient's,1
+appius,ap* pius,1
+atones,A tones*,1
+bards,bards*,2
+beheld,be held*,1
+betimes,be times*,1
+blackmores,Black* mores,1
+blasphemies,blas* phem ies*,1
+bookful,book* ful,1
+cavil,Ca vil*,1
+clime,clime*,1
+complacence,com pla* cence,1
+confuted,con futed*,1
+couplet,coup* let,1
+courtier's,cour* tier's,2
+coxcombs,cox* combs,1
+cremona,cre mon* a,1
+critic-learning,crit* ic -learn* ing,1
+criticise,crit* i cise*,1
+dedicators,ded* i ca* tors,1
+deeps,deeps*,1
+denham's,Den* ham's,1
+descry,de scry*,1
+diffidence,dif* fid ence*,1
+discoursed,Dis coursed* ,1
+doublets,doub* lets,1
+dryden's,Dry* den's,1
+dully,dul* ly,1
+durfey's,Dur* fey's,1
+e'er,e'er,1
+e'er,e'er*,2
+edifies,ed* i fies*,1
+enlights,En lights*,1
+envy's,en* vy's,1
+eunuch's,eu* nuch's,1
+exactness,exact* ness,1
+familiarly,fa mil* iar ly*,1
+farces,far* ces,1
+faultless,fault* less,1
+faults--but,faults* --but,1
+flagitious,fla gi* tious,1
+flatterer,flat* terer,1
+fops,fops*,2
+friend--and,friend* --and,1
+fungoso,Fun go* so,1
+garbs,garbs*,1
+gayly,gay* ly,1
+gilds,gilds*,1
+good-nature,Good -na* ture,1
+goths,Goths*,1
+grandsires,grand* sires,1
+grossness,gross* ness,1
+half-formed,half-* formed,1
+half-learned,half-* learned,1
+handmaid,hand* maid,1
+ignorantly,ig* nor ant* ly,1
+impenitently,im pen* i tent* ly,1
+indeed--but,in deed* --but,1
+indites,in dites*,1
+invention's,in ven* tion's,1
+jilts,Jilts,1
+jingling,jing* ling,1
+jove,Jove*,1
+justest,just* est,1
+languishingly,lan* guish ing* ly,1
+latium,La* tium,1
+longinus,lon gin* us,1
+maeonian,Mae on* ian,1
+maevius,Mae* vius,1
+mancha's,Man* cha's,1
+mantuan,Man* tuan,1
+meanly,Mean ly*,1
+memory's,mem* or y's*,1
+methodized,meth* o dized*,1
+millbourns,Mill* bourns,1
+misshaped,mis shaped*,1
+muse's,mu* se's,3
+never-failing,nev* er -fail* ing,1
+niggards,nig* gards,1
+o'er,o'er ,3
+o'er,o'er*,4
+o'erlooked,o'er looked*,1
+o'errun,o'er run*,1
+o'erspread,o'er spread*,1
+parnassus',Par nas* sus',2
+petronius,Pe tron* ius,1
+phlegm,phlegm*,1
+pierian,pi er* ian,1
+plainness,plain* ness,1
+poetry--in,po* et ry* --in,1
+pothecaries,poth* e car* ies,1
+prepossessed,pre* poss sessed*,1
+quintilian's,Quin til* ian's,1
+reddens,red* dens,1
+reproof,re proof*,1
+resistless,re sist* less,2
+ripens,ri* pens,1
+roscommon,Ros com* mon,1
+scandalously,scan* dal ous* ly,1
+schismatics,schis* mat ics*,1
+school-divines,school* -div ines*,1
+scotists,Sco tists*,1
+self-love,self -love*,1
+sincerest,sin cer* est,1
+skims,skims*,1
+socinus,So cin* us,1
+sonnetteer,son* et teer*,1
+sots,sots*,1
+stagirite,Stag* ir ite*,3
+still--"the,still* --"the ,1
+sublimes,sub limes*,1
+thomists,Thom* ists,1
+threescore,three score*,1
+timotheus,Tim o* theus,1
+timotheus',Tim o* theus',1
+to-day,to -day*,1
+to-morrow's,to -mor* row's,1
+trembles,trem* bles,1
+uncensured,un cen* sured,1
+unconquered,un con* quered,1
+unequally,un e* qual ly*,1
+unerring,Un err* ing,1
+unfortified,un for* ti fied*,1
+unities,u* nit ies*,1
+unlearned,un* learned,,1
+unlearned,un learned*,1
+unmeaning,un mean* ing,1
+unvaried,un var* ied,1
+waller's,Wall* er's,1
+walsh--the,Walsh* --the,1
+well-bred,well -bred*,1
+whate'er,what e'er*,1
+where'er,wher e'er*,1
+witlings,wit* lings,1
+woful,wo* ful,1
+zoilus,Zoi lus*,1
