@@ -6,8 +6,8 @@ import sys
 import operator # Necessary for sorting dictionaries by value
 
 CMU = cmudict.dict()
-PRIVATEDICTIONARYFILENAME = './private.dictionary'
-PRIVATEDICTIONARY = dict()
+PRIVATEDICTIONARYFILENAME = 'private.dictionary'
+
 PUNCTUATION = '!"#$%&()*+,./:;<=>?@[\\]^_`{|}~\-'
 EXCLUDE = set('!"#$%&()*+,./:;<=>?@[\\]^_`{|}~')
 
@@ -21,7 +21,49 @@ UNSTRESSED = """a an of the am and n for in is on or that to with
               these those came come none one two three four five six eight nine ten 
               ah en et la may non off per re than un his""".split()
 
+privateDictionary = {}
+
+def loadPrivateDict():
+    """
+    This function loads the private dictionary file found in the global variable 
+    PRIVATEDICTIONARYFILENAME. It also calculates normalized scores for each of the 
+    terms. These scores represent how many of the scanned instances of a key term are
+    represented by a single scanscion. If, for instance, we have seen the word "almost" 
+    three, times, always scanned as a trochee, it would have one entry in our private 
+    dictionary, with a score of 1.00. If however we observe it four times, twice as a trochee,
+    one as an iamb (!) and once as a pyrhuss (!!), our private dictionary would have three
+    entries for the single key "almost": the iambic entry would have a score of 0.50, the 
+    pyrhic and trochaic entries would each have scores of 0.25.
+    """
+    privateDict = {}
+
+    for line in open(PRIVATEDICTIONARYFILENAME,'r').readlines():
+        if not(line.startswith('#')):
+            word, scanscion, frequency = line.split(',')
+            if word in privateDict:
+                privateDict[word].append((scanscion, int(frequency)))
+            else:
+                privateDict[word] = [(scanscion, int(frequency))]
+
+    # Now loop back through to normalize scores.
+    for word in privateDict.keys():
+        total = 0
+
+        for scantuple in privateDict[word]:
+            total += scantuple[1]
+
+        normalized = []
+        for scantuple in privateDict[word]:
+            normalized.append((scantuple[0], float(scantuple[1])/float(total)))
+
+        # Now replace the entry for the word with the normalized list.
+        privateDict[word] = normalized
+                                 
+    return privateDict
+
 class Poem():
+    global privateDictionary 
+    privateDictionary = loadPrivateDict()
 
     def __init__(self,rawtext):
         self.lines = []
@@ -138,9 +180,32 @@ class PoeticWord():
             # See if the last character of the CMU representation of this phoneme is a digit.
             # i.e. does it mark a syllable break.
             if item[-1].isdigit():
-                verseList.append(item[-1])
+                verseList.append(int(item[-1]))
 
         return verseList
+
+    def PrivDict_to_scansion(self, privString):
+        """
+        This function takes an entry from our Private Dictionary and simplifies it. 
+        Private Dictionary gives a string representing scansion:
+        lovely = "love* ly"
+        But we want not phonemes, but syllables and stresses.
+        lovely = [1, 0]. 
+        Total length of our list should be the total number of syllables, 
+        with 0 representing no stress, 1 representing primary stress, and 2 as secondary stress.
+        """
+        verseList = []
+        
+        for syllable in privString.split():
+            # See if the last character of the string representation of this syllable
+            # is an asterisk (i.e. does it mark a stress).
+            if syllable[-1] == '*':
+                verseList.append(1)
+            else:
+                verseList.append(0)
+
+        return verseList
+
 
 
     def word_lookup(self):
@@ -156,9 +221,12 @@ class PoeticWord():
             self.inDict = True
             # Here we oversimplify CMU Dict's representation of a word by discarding alternate pronunciations
             return self.CMUDict_to_scansion(CMU[word][0])
-        elif word in PRIVATEDICTIONARY:
+        elif word in privateDictionary:
             self.inDict = True
-            return PRIVATEDICTIONARY[word]
+
+            # Right now we return the scanscion with the greatest frequency.
+            return self.PrivDict_to_scansion(privateDictionary[word][0][0])
+
         else:
             return self.fallback(word)
                
@@ -230,3 +298,4 @@ def tokenize_line(line):
         words=[]
 
     return words
+
