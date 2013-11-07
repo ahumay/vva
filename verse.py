@@ -4,6 +4,7 @@ from nltk.corpus import cmudict
 from nltk.tokenize import RegexpTokenizer
 import sys
 import operator # Necessary for sorting dictionaries by value
+import hyphen # Necessary for syllabification
 
 CMU = cmudict.dict()
 PRIVATEDICTIONARYFILENAME = 'private.dictionary'
@@ -91,7 +92,7 @@ class Poem():
             <head>
               <meta charset='utf-8'>
               <title>"""+self.title+"""</title>
-              <link rel='stylesheet' href='scanscion.css'>
+              <link rel='stylesheet' href='scansion.css'>
             </head>
 
             <body>
@@ -116,22 +117,17 @@ class Poem():
                     if(word.text[:-1] in PUNCTUATION): 
                         terminalPunctuation = word.text[:-1]
 
+#                print "Word: ", word.text, "Syllables: ", word.syllables, " Scanscion: ", word.scansion
                 outword = ''
-                syllables = len(word.scansion)
-
-                syllLen = (len(word.text) / syllables)+1
-                splitWord = [word.text[x:x+syllLen] for x in range(0,len(word.text),syllLen)]
-
                 syllNo = 0
-                
-                for syllable in splitWord:
-                    if(str(word.scansion[syllNo]) == '0'):
+                syllTotal = len(word.syllables)
+                for syllable, stress in zip(word.syllables, word.scansion):
+                    syllNo += 1
+                    if not(stress):
                         outword += syllable
                     else:
                         outword += '<strong>'+syllable+'</strong>'
-                    syllNo += 1
-
-                    if syllNo < syllables:
+                    if (syllNo < syllTotal):
                         outword += '&middot;'
 
                 outword += terminalPunctuation
@@ -153,7 +149,7 @@ class PoeticWord():
         self.inDict = False
         self.text = raw_text.strip()
         self.scansion = self.word_lookup()
-
+        self.syllables = self.syllabify()
         return
 
     def fallback(self, string):
@@ -207,7 +203,6 @@ class PoeticWord():
         return verseList
 
 
-
     def word_lookup(self):
         # Strip terminal punctuation from word.
         word = self.text.strip(PUNCTUATION)
@@ -229,6 +224,45 @@ class PoeticWord():
 
         else:
             return self.fallback(word)
+
+    def syllabify(self):
+        """
+        This function uses the hyphen package to develop a plausible hyphenation
+        of a term. If first grabs all places, according to hyphen, a word could be 
+        hyphenated; it then reduces that list based on what we observed. This is a
+        some janky way of trying to maintain information about the word and the scanscion
+        so that we can have a nice, pleasing output.
+        """
+#        hyphenator = hyphen.Hyphenator('en_GB')
+        # I've had better luck with the US hyphenator.
+        hyphenator = hyphen.Hyphenator('en_US')
+        syllables = hyphenator.syllables(unicode(self.text))
+
+        # Hyphenator returns unicode; for simplicity, let's convert it back to 
+        # to ascii.
+
+        syllables = [syll.encode('ascii','ignore') for syll in syllables]
+
+#        print "Starting text: ", self.text
+#        print "Starting Syllables: ", syllables
+
+        # If syllables is *shorter* than our scanscion, we have 
+        # a problem.
+ #       if(len(syllables) < len(self.scansion)):
+ #           syllables = [self.text]
+ #           return syllables
+
+        while(len(syllables) > len(self.scansion)):
+            syllables = [syllables[0].encode('ascii','ignore') + syllables[1]] + syllables[2:]
+
+        # I'm sometimes getting empty lists and I don't know why, so 
+        # I've added this rule until I can figure out what's going on.
+        if not syllables:
+            syllables = [self.text]
+
+#        print "Ending Syllables: ", syllables
+
+        return syllables
                
 
 class PoeticLine():
