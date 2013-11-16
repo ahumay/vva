@@ -68,6 +68,14 @@ class Poem():
 
     def __init__(self,rawtext):
         self.lines = []
+
+        # The following three variables count lists that 
+        # store information about the location of stress
+        # throughout the poem used to guess its prevailing meter.
+        self.beforeFirstList = []
+        self.afterLastList = []
+        self.betweenList = []
+
         text = rawtext.split('\n')
 
         self.title = text[0].strip('#').strip()
@@ -76,6 +84,12 @@ class Poem():
             if not(line.startswith('#')) and (line):
                 self.lines.append(PoeticLine(line))
 
+        for line in self.lines:
+            self.beforeFirstList.append(line.unstressedBeforeFirst)
+            for val in line.unstressedBetween:
+                self.betweenList.append(val)
+            self.afterLastList.append(line.unstressedAfterLast)
+
     def __str__(self):
         output = ""
 
@@ -83,6 +97,36 @@ class Poem():
             output += line.rawtext + '\n'
 
         return output
+
+    def promoteUnstressed(self):
+        if(self.doubleMeter):
+            for line in self.lines:
+                line.promote_unstressed(meter='double')
+                line.update_counts()
+        if(self.tripleMeter):
+            for line in self.lines:
+                line.promote_unstressed(meter='triple')
+                line.update_counts()
+
+    def doubleMeter(self):
+        """
+        Guesses whether this poem is written in a double meter (iambic, trochaic).
+        Returns True or False.
+        """
+        if self.guessMeter()[0] in ['iambic', 'trochaic', 'trochaic catalectic']:
+            return True
+        else:
+            return False
+
+    def tripleMeter(self):
+        """
+        Guesses whether this poem is written in a triple meter (anapestic, dactylic).
+        Returns True or False.
+        """
+        if self.guessMeter()[0] in ['anapestic', 'dactylic', 'amphibrachic']:
+            return True
+        else:
+            return False
 
     def html(self):
         # Print HTML header
@@ -106,6 +150,9 @@ class Poem():
             line_output = "<p class='line'>"
             capitalized = False
             terminalPunctuation = ''
+
+            position = 0
+
             for word in line.words:
                 # Let's save initial capitalization and terminal punctuation
                 # in the original to restore it in the output. We could add hyphenation
@@ -121,18 +168,25 @@ class Poem():
                 outword = ''
                 syllNo = 0
                 syllTotal = len(word.syllables)
-                for syllable, stress in zip(word.syllables, word.scansion):
+                for syllable in word.syllables:
                     syllNo += 1
+
+                    stress = line.scanned_line[position]
+
                     if not(stress):
                         outword += syllable
+                    elif (stress == 2):
+                        outword += "<span class='secondary'>"+syllable+"</span>"
                     else:
                         outword += '<strong>'+syllable+'</strong>'
                     if (syllNo < syllTotal):
                         outword += '&middot;'
+                    position += 1
 
                 outword += terminalPunctuation
 
                 line_output += outword + ' ' 
+
             line_output += "</p>"
             print line_output
 
@@ -142,6 +196,47 @@ class Poem():
                 </body>
               </html>"""
 
+    def guessMeter(self):
+        """
+        Following Plamondon's rules, this function uses lists of three values:
+        - number of unstressed syllables before first stress
+        - number of unstressed syllables between stresses
+        - number of unstressed syllables after last stress
+        to guess the meter (one of six: iambic, trochaic, trochaic catalectic,
+        anapestic, dactylic, amphibrachic). This is returned as a string. 
+        It also returns a confidence interval.
+        """
+        beforeFirst = most_common_values(self.beforeFirstList)[0]
+        between = most_common_values(self.betweenList)[0]
+        afterLast = most_common_values(self.afterLastList)[0]
+
+        confidence = float(self.betweenList.count(between)) / float(len(self.betweenList))
+
+#        print "BETWEEN: ", between, ";", self.betweenList.count(between) , ":", len(self.betweenList)
+
+        if(beforeFirst == 1) and (afterLast == 0) and (between == 1):
+            meter = "iambic"
+        else:
+            if(beforeFirst == 0) and (afterLast == 1) and (between == 1):
+                meter = "trochaic"
+            else: 
+                if(beforeFirst == 0) and (afterLast == 0) and (between == 1):
+                    meter = "trochaic catalectic"
+                else:
+                    if(beforeFirst == 2) and (afterLast == 0) and (between == 2):
+                        meter = "anapestic"
+                    else:
+                        if(beforeFirst == 0) and (afterLast == 2) and (between == 2):
+                            meter = "dactylic"
+                        else:
+                            if(beforeFirst == 1) and (afterLast == 1) and (between == 2):
+                                meter = "amphibrachic"
+                            else:
+                                meter = "unknown"
+
+        return (meter, confidence)
+
+        
 
 
 class PoeticWord():
@@ -291,6 +386,35 @@ class PoeticLine():
 
         return 
 
+    def promote_unstressed(self, meter='double'):
+        """
+        This function promotes unstressed syllables to stress 
+        based on postion.
+        """
+        if(meter =='double'):
+            for i in range(1, len(self.scanned_line[1:-1])):
+#                print "current:" , self.scanned_line[i], " previous:" , self.scanned_line[i-1], " next:" , self.scanned_line[i+1]
+                if((self.scanned_line[i] == 0) and (self.scanned_line[i-1] == 0) and (self.scanned_line[i+1] == 0)):
+                    # Promote this syllable to stressed!
+#                    print "Promoted!"
+                    self.scanned_line[i] = 1
+
+            # This separate rule handles instances where the last syllable
+            # of a line should be promoted.
+            if((self.scanned_line[-1] == 0) and (self.scanned_line[-2] == 0)):
+                self.scanned_line[-1] = 1
+
+        if(meter == 'triple'):
+            for i in range(2, len(self.scanned_line[2:-2])):
+                if((self.scanned_line[i] == 0) and (self.scanned_line[i-2] == 0) and (self.scanned_line[i-1] == 0) and (self.scanned_line[i+2] == 0) and (self.scanned_line[i+1] == 0)):
+                    self.scanned_line[i] = 1
+
+            # This separate rule handles instances where the last syllable
+            # of a line should be promoted.
+            if((self.scanned_line[-1] == 0) and (self.scanned_line[-2] == 0) and (self.scanned_line[-3] == 0)):
+                self.scanned_line[-1] = 1
+
+
     def update_counts(self):
         # Reset our list
         self.unstressedBetween = []
@@ -333,3 +457,28 @@ def tokenize_line(line):
 
     return words
 
+def most_common_values(alist):
+    """
+    This function takes a list of values and returns the most frequently
+    occuring value and the second most frequently occurring value as a tuple.
+    """
+    # We'll loop through our list, converting them to a dictionary 
+    # of frequencies.
+    freqs = {}
+    for value in alist:
+        if value in freqs:
+            freqs[value] += 1
+        else: 
+            freqs[value] = 1
+
+    # Sort the dictionary by value and return the two most 
+    # frequently occuring values.
+    sorted_freqs = sorted(freqs.iteritems(), key=operator.itemgetter(1), reverse=True)
+
+    print sorted_freqs
+
+    if(len(sorted_freqs) > 1):
+        return (sorted_freqs[0][0], sorted_freqs[1][0])
+    else:
+        return (sorted_freqs[0][0], None)
+    
