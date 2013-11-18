@@ -5,6 +5,7 @@ from nltk.tokenize import RegexpTokenizer
 import sys
 import operator # Necessary for sorting dictionaries by value
 import hyphen # Necessary for syllabification
+import math
 
 CMU = cmudict.dict()
 PRIVATEDICTIONARYFILENAME = 'private.dictionary'
@@ -350,15 +351,25 @@ class PoeticWord():
         while(len(syllables) > len(self.scansion)):
             syllables = [syllables[0].encode('ascii','ignore') + syllables[1]] + syllables[2:]
 
+        # If the number of syllables doesn't equal the numnber of 
+        # stresses we're expecting, we split the word dumbly.
+        if(len(syllables) < len(self.scansion)):
+#            syllables = self.dumbSyllGuess(self.text, len(self.scansion))
+            syllables = []
+
+            # This next line casts the variables as floats, uses math.ceil 
+            # to round up, and then returns the value to an int.
+            syllLength = int(math.ceil((len(self.text) / float(len(self.scansion)))))
+            syllables = [self.text[i:i+syllLength] for i in xrange(0, len(self.text), syllLength)]
+
         # I'm sometimes getting empty lists and I don't know why, so 
         # I've added this rule until I can figure out what's going on.
         if not syllables:
             syllables = [self.text]
 
-#        print "Ending Syllables: ", syllables
 
         return syllables
-               
+
 
 class PoeticLine():
     def __init__(self, rawtextline=""):
@@ -401,18 +412,29 @@ class PoeticLine():
 
             # This separate rule handles instances where the last syllable
             # of a line should be promoted.
-            if((self.scanned_line[-1] == 0) and (self.scanned_line[-2] == 0)):
-                self.scanned_line[-1] = 1
+            try:
+                if((self.scanned_line[-1] == 0) and (self.scanned_line[-2] == 0)):
+                    self.scanned_line[-1] = 1
+            except:
+                print "whoops, assuming this has at least two elements", self.scanned_line 
 
         if(meter == 'triple'):
             for i in range(2, len(self.scanned_line[2:-2])):
-                if((self.scanned_line[i] == 0) and (self.scanned_line[i-2] == 0) and (self.scanned_line[i-1] == 0) and (self.scanned_line[i+2] == 0) and (self.scanned_line[i+1] == 0)):
-                    self.scanned_line[i] = 1
+                try:
+                    if((self.scanned_line[i] == 0) and (self.scanned_line[i-2] == 0) and (self.scanned_line[i-1] == 0) and (self.scanned_line[i+2] == 0) and (self.scanned_line[i+1] == 0)):
+                        self.scanned_line[i] = 1
+                except:
+                    print "whoops, assuming this has at least three elements", self.scanned_line 
 
+                        
             # This separate rule handles instances where the last syllable
             # of a line should be promoted.
-            if((self.scanned_line[-1] == 0) and (self.scanned_line[-2] == 0) and (self.scanned_line[-3] == 0)):
-                self.scanned_line[-1] = 1
+            try: 
+                if((self.scanned_line[-1] == 0) and (self.scanned_line[-2] == 0) and (self.scanned_line[-3] == 0)):
+                    self.scanned_line[-1] = 1
+            except:
+                print "whoops, assuming this has at least three elements", self.scanned_line 
+
 
 
     def update_counts(self):
