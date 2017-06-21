@@ -1,6 +1,7 @@
 # funcs.py
 # functions appear in order they're called
 
+
 import nltk
 from curses.ascii import isdigit
 from nltk.corpus import cmudict
